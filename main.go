@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/EdwardAndrew/MovieBuff/pkg/handlers"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -16,8 +17,7 @@ func start() {
 		log.Fatal("Error creating Discord session: ", err)
 		return
 	}
-
-	discord.AddHandler(messageCreate)
+	handlers.BindHandlers(discord)
 	discord.Identify.Intents = discordgo.IntentsGuildMessages
 
 	err = discord.Open()
@@ -27,22 +27,12 @@ func start() {
 	}
 
 	log.Println("Bot started.")
+
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
 	discord.Close()
-}
-
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// Ignore from itself
-	if m.Author.ID == s.State.User.ID {
-		return
-	}
-
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "Heddo world")
-	}
 }
 
 func main() {
