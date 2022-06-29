@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/EdwardAndrew/MovieBuff/config"
+	"github.com/EdwardAndrew/MovieBuff/pkg/commands"
 	"github.com/EdwardAndrew/MovieBuff/pkg/utils"
 	"github.com/bwmarrin/discordgo"
 )
@@ -41,8 +42,9 @@ func Route(s *discordgo.Session, m *discordgo.Message) {
 	case "prefix":
 		s.ChannelMessageSend(m.ChannelID, utils.BlankChar+config.Get().Prefix+" is my prefix.")
 	default:
-		s.ChannelMessageSend(m.ChannelID, "I don't understand that, sorry!")
-		s.MessageReactionAdd(m.ChannelID, m.ID, "991756430900199565")
+		// s.ChannelMessageSend(m.ChannelID, "I don't understand that, sorry!")
+		// s.MessageReactionAdd(m.ChannelID, m.ID, "991756430900199565")
+		commands.Search(s, m)
 	}
 
 }
