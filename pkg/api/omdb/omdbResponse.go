@@ -1,4 +1,4 @@
-package api
+package omdb
 
 type OMDBSearchResultRating struct {
 	Source string

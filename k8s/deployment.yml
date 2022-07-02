@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moviebuff-deployment
+  labels:
+    app: moviebuff
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moviebuff
+  template:
+    metadata:
+      labels:
+        app: moviebuff
+    spec:
+      containers:
+      - name: moviebuff
+        image: localhost:5001/moviebuff:latest # local registry

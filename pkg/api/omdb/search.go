@@ -1,4 +1,4 @@
-package api
+package omdb
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/EdwardAndrew/MovieBuff/config"
+	"github.com/EdwardAndrew/MovieBuff/pkg/config"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -48,7 +48,7 @@ func Search(term string) (*discordgo.MessageEmbed, error) {
 		return result, err
 	}
 
-	return result, nil
+	return omdbResponseToMessageEmbed(omdbResponse), nil
 }
 
 func omdbResponseToMessageEmbed(o *OMDBSearchResult) *discordgo.MessageEmbed {

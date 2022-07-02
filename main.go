@@ -11,7 +11,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-redis/redis/v9"
 
-	"github.com/EdwardAndrew/MovieBuff/config"
+	"github.com/EdwardAndrew/MovieBuff/pkg/config"
 	"github.com/EdwardAndrew/MovieBuff/pkg/handlers"
 )
 
