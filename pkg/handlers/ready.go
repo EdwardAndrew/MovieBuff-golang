@@ -8,5 +8,5 @@ import (
 )
 
 func ready(s *discordgo.Session, r *discordgo.Ready) {
-	log.Println(config.Get().BotName + " " + config.Get().Version + " now ready.")
+	log.Println(config.Get().BotName + " " + config.Get().Version + " ready.")
 }

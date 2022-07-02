@@ -14,7 +14,7 @@ func Search(s *discordgo.Session, m *discordgo.Message) {
 	search := getRelevantSearch()
 
 	embed, err := search(term)
-	if err == nil {
+	if err != nil {
 		s.MessageReactionAdd(m.ChannelID, m.ID, "991756430900199565")
 		s.ChannelMessageSend(m.ChannelID, u.FormatResponse("I couldn't find anything, sorry!"))
 
@@ -24,7 +24,7 @@ func Search(s *discordgo.Session, m *discordgo.Message) {
 
 	reply := &discordgo.MessageSend{
 		Embeds:  []*discordgo.MessageEmbed{embed},
-		Content: u.FormatResponse("Here's what I can tell you about _" + term + "_"),
+		Content: u.FormatResponse("Here's what I can tell you about _" + embed.Title + "_"),
 	}
 	s.ChannelMessageSendComplex(m.ChannelID, reply)
 }
