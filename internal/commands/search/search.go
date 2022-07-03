@@ -2,12 +2,10 @@ package search
 
 import (
 	"log"
-	"strings"
 
 	a "github.com/EdwardAndrew/MovieBuff/internal/api"
 	"github.com/EdwardAndrew/MovieBuff/internal/api/omdb"
 	u "github.com/EdwardAndrew/MovieBuff/internal/utils"
-	"github.com/EdwardAndrew/MovieBuff/pkg/cache"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -15,12 +13,15 @@ import (
 func Search(s *discordgo.Session, m *discordgo.Message) {
 	searchTerm := u.RemoveBotPrefix(m.Content, s.State.User.ID)
 
-	embed, err := fetchData(searchTerm)
-	if err != nil {
-		s.MessageReactionAdd(m.ChannelID, m.ID, "991756430900199565")
-		s.ChannelMessageSend(m.ChannelID, u.FormatResponse("I couldn't find anything, sorry!"))
+	success, embed, err := fetchEmbed(searchTerm)
 
-		log.Println("Something went wrong when calling the api...")
+	if err != nil {
+		log.Println("Something went wrong when calling the OMDB api.")
+		return
+	}
+	if !success {
+		s.MessageReactionAdd(m.ChannelID, m.ID, "😭")
+		s.ChannelMessageSend(m.ChannelID, u.FormatResponse("I couldn't find anything, sorry!"))
 		return
 	}
 
@@ -35,21 +36,38 @@ func getRelevantAPI() a.CachedSearchAPI {
 	return omdb.API
 }
 
-func fetchData(term string) (*discordgo.MessageEmbed, error) {
+func fetchEmbed(search string) (bool, *discordgo.MessageEmbed, error) {
 	api := getRelevantAPI()
 
-	cacheKey, err := cache.Get(strings.Join([]string{api.GetSearchCachePrefix(), term}, ""))
-	if err != nil {
-		log.Println("Something went wrong")
+	// Attempt to use cached data
+	didFindCachedData, data, err := fetchDataFromCache(api, search, true)
+	if didFindCachedData {
+		if embed, err := api.GetMessageEmbedFromData(data); err == nil {
+			log.Println("Retrived from cache.")
+			return true, embed, nil
+		}
 	}
 
-	//TODO: Try to fetch data from redis cache
+	// Fetch new data from API
+	result, err := api.Search(search)
+	if err != nil {
+		return false, nil, err
+	}
 
-	//TODO: If data exists we need to parse it back into a discord embed and return it
+	log.Print(result)
+	if !result.HasData {
+		return false, nil, nil
+	}
+	incrementSearchCount(result.SearchKey, api)
 
-	//TODO: Use a longish (3 months maybe?) TTL for storing cached data.
+	embed, err := api.GetMessageEmbedFromData(result.Data)
+	if err != nil {
+		return false, nil, err
+	}
+	embed = setAskedCountFooter(embed, result.SearchKey, api)
 
-	log.Print(cacheKey)
+	go cacheResponse(search, api, result)
 
-	return nil, nil
+	log.Println("Fetched from server.")
+	return true, embed, nil
 }

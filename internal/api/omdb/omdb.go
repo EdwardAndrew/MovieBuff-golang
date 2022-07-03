@@ -33,5 +33,5 @@ func (o OMDB) GetDataCachePrefix() string {
 }
 
 func (o OMDB) GetCountCachePrefix() string {
-	return config.Get().CacheGlobalPrefix + "count/"
+	return config.Get().CacheGlobalPrefix + "movieCount-omdb/"
 }

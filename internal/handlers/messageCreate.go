@@ -28,5 +28,5 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	router.Route(s, m.Message)
+	go router.Route(s, m.Message)
 }

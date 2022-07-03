@@ -4,34 +4,66 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/go-redis/redis/v9"
 )
 
+var rdb *redis.Client
 var ctx = context.Background()
 
-var rdb *redis.Client
+func Connect(o *redis.Options) {
+	rdb = redis.NewClient(o)
+}
 
-func Connect(options *redis.Options) {
-	rdb = redis.NewClient(options)
+func Close() {
+	if rdb != nil {
+		rdb.Close()
+	}
 }
 
 func Increment(key string) error {
-	err := checkRedis()
-	if err != nil {
+	if err := checkRedis(); err != nil {
 		log.Print(err)
 	}
 
 	return rdb.Incr(ctx, key).Err()
 }
 
-func Get(key string) (string, error) {
+// Takes a key and returns a bool indicating if any data was found,
+//  cached data as a string. And also an error.
+func Get(key string) (bool, string, error) {
+	err := checkRedis()
+	if err != nil {
+		log.Print(err)
+	}
+	resp, err := rdb.Get(ctx, key).Result()
+
+	if err == nil {
+		return true, resp, nil
+	} else if err.Error() == redis.Nil.Error() {
+		return false, resp, nil
+	}
+
+	return false, resp, err
+}
+
+func Set(key, val string, expiration time.Duration) error {
 	err := checkRedis()
 	if err != nil {
 		log.Print(err)
 	}
 
-	return rdb.Get(ctx, key).Result()
+	return rdb.Set(ctx, key, val, expiration).Err()
+}
+
+func SetMultiple(keys []string, values []string) error {
+	var pairs []interface{}
+	for i := range keys {
+		pairs = append(pairs, keys[i], values[i])
+	}
+
+	return rdb.MSet(ctx, pairs...).Err()
 }
 
 func checkRedis() error {

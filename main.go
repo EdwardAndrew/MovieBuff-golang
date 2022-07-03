@@ -39,4 +39,5 @@ func main() {
 	<-sc
 
 	discord.Close()
+	cache.Close()
 }

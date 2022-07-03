@@ -3,16 +3,20 @@ package omdb
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/EdwardAndrew/MovieBuff/internal/api"
 	"github.com/EdwardAndrew/MovieBuff/internal/config"
 	"github.com/bwmarrin/discordgo"
 )
 
-func (o OMDB) Search(term string) (*discordgo.MessageEmbed, error) {
-	result := new(discordgo.MessageEmbed)
-
+func (o OMDB) Search(term string) (api.CachedSearchAPIResponse, error) {
+	result := api.CachedSearchAPIResponse{
+		SearchKey: "",
+		Data:      "",
+		HasData:   false,
+	}
 	req, err := http.NewRequest("GET", o.baseURL, nil)
 	if err != nil {
 		return result, err
@@ -31,19 +35,39 @@ func (o OMDB) Search(term string) (*discordgo.MessageEmbed, error) {
 		return result, err
 	}
 	defer resp.Body.Close()
-	log.Println("Received response from OMDB.")
 
 	if resp.StatusCode != http.StatusOK {
 		return result, errors.New("Did not receive StatusOK from OMDB")
 	}
 
-	omdbResponse := new(OMDBSearchResult)
-	err = json.NewDecoder(resp.Body).Decode(&omdbResponse)
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return result, err
 	}
 
-	return omdbResponseToMessageEmbed(omdbResponse), nil
+	json := new(OMDBSearchResult)
+	json.FromString(string(data))
+
+	if json.Response != "False" {
+		return api.CachedSearchAPIResponse{
+			HasData:   true,
+			Data:      string(data),
+			SearchKey: json.Title,
+		}, nil
+	}
+
+	return result, nil
+}
+
+func (o OMDB) GetMessageEmbedFromData(data string) (*discordgo.MessageEmbed, error) {
+	osr := new(OMDBSearchResult)
+	err := osr.FromString(data)
+	return omdbResponseToMessageEmbed(osr), err
+}
+
+func (o *OMDBSearchResult) FromString(s string) error {
+	err := json.Unmarshal([]byte(s), o)
+	return err
 }
 
 func omdbResponseToMessageEmbed(o *OMDBSearchResult) *discordgo.MessageEmbed {
