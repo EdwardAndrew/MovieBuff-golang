@@ -5,20 +5,15 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/EdwardAndrew/MovieBuff/pkg/config"
+	"github.com/EdwardAndrew/MovieBuff/internal/config"
 	"github.com/bwmarrin/discordgo"
 )
 
-var omdb = &http.Client{
-	Timeout: time.Second * 10,
-}
-
-func Search(term string) (*discordgo.MessageEmbed, error) {
+func (o OMDB) Search(term string) (*discordgo.MessageEmbed, error) {
 	result := new(discordgo.MessageEmbed)
 
-	req, err := http.NewRequest("GET", config.Get().OMDB.Base_URL, nil)
+	req, err := http.NewRequest("GET", o.baseURL, nil)
 	if err != nil {
 		return result, err
 	}
@@ -31,7 +26,7 @@ func Search(term string) (*discordgo.MessageEmbed, error) {
 
 	req.URL.RawQuery = q.Encode()
 
-	resp, err := omdb.Get(req.URL.String())
+	resp, err := o.client.Get(req.URL.String())
 	if err != nil {
 		return result, err
 	}

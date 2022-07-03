@@ -3,7 +3,7 @@ package utils
 import (
 	"strings"
 
-	"github.com/EdwardAndrew/MovieBuff/pkg/config"
+	"github.com/EdwardAndrew/MovieBuff/internal/config"
 )
 
 const BlankChar = "\u200B"

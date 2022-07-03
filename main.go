@@ -6,13 +6,19 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/EdwardAndrew/MovieBuff/internal/config"
+	"github.com/EdwardAndrew/MovieBuff/internal/handlers"
+	"github.com/EdwardAndrew/MovieBuff/pkg/cache"
 	"github.com/bwmarrin/discordgo"
-
-	"github.com/EdwardAndrew/MovieBuff/pkg/config"
-	"github.com/EdwardAndrew/MovieBuff/pkg/handlers"
+	"github.com/go-redis/redis/v9"
 )
 
 func main() {
+	cache.Connect(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password
+		DB:       0,  // default
+	})
 	discord, err := discordgo.New("Bot " + config.Get().DiscordToken)
 
 	if err != nil {

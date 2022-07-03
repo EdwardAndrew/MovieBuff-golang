@@ -3,7 +3,7 @@ package handlers
 import (
 	"log"
 
-	"github.com/EdwardAndrew/MovieBuff/pkg/config"
+	"github.com/EdwardAndrew/MovieBuff/internal/config"
 	"github.com/bwmarrin/discordgo"
 )
 

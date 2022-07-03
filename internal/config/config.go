@@ -13,12 +13,13 @@ type omdb struct {
 }
 
 type config struct {
-	Prefix       string
-	OMDB         omdb
-	DiscordToken string
-	BotName      string
-	Version      string
-	DeveloperId  string
+	Prefix            string
+	OMDB              omdb
+	DiscordToken      string
+	BotName           string
+	Version           string
+	DeveloperId       string
+	CacheGlobalPrefix string
 }
 
 type environmentVariable struct {
@@ -51,10 +52,11 @@ func loadConfig() config {
 			API_Key:  omdbAPIKey,
 			Base_URL: "https://www.omdbapi.com",
 		},
-		DiscordToken: discordToken,
-		BotName:      "MovieBuff",
-		DeveloperId:  developerId,
-		Version:      "2.0.0",
+		DiscordToken:      discordToken,
+		BotName:           "MovieBuff",
+		DeveloperId:       developerId,
+		CacheGlobalPrefix: "moviebuff/",
+		Version:           "2.0.0",
 	}
 
 	return result

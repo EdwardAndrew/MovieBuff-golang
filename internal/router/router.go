@@ -1,9 +1,9 @@
 package router
 
 import (
-	"github.com/EdwardAndrew/MovieBuff/pkg/commands"
-	"github.com/EdwardAndrew/MovieBuff/pkg/config"
-	u "github.com/EdwardAndrew/MovieBuff/pkg/utils"
+	"github.com/EdwardAndrew/MovieBuff/internal/commands/search"
+	"github.com/EdwardAndrew/MovieBuff/internal/config"
+	u "github.com/EdwardAndrew/MovieBuff/internal/utils"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -33,7 +33,7 @@ func Route(s *discordgo.Session, m *discordgo.Message) {
 	case "prefix":
 		s.ChannelMessageSend(m.ChannelID, u.FormatResponse(config.Get().Prefix+" is my prefix."))
 	default:
-		commands.Search(s, m)
+		search.Search(s, m)
 	}
 
 }
