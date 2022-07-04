@@ -8,33 +8,35 @@ import (
 
 	a "github.com/EdwardAndrew/MovieBuff/internal/api"
 	"github.com/EdwardAndrew/MovieBuff/pkg/cache"
-	"github.com/bwmarrin/discordgo"
 )
 
-func fetchDataFromCache(api a.CachedSearchAPI, search string, incrmentCount bool) (bool, string, error) {
+type cacheFetchResponse struct {
+	Found    bool
+	Data     string
+	CacheKey string
+}
+
+func cacheFetch(api a.CachedSearchAPI, search string) (cacheFetchResponse, error) {
 	hasSearchKey, searchKey, err := cache.Get(strings.Join([]string{api.GetSearchCachePrefix(), search}, ""))
 	if err != nil {
-		return false, "", err
+		return cacheFetchResponse{}, err
 	}
 
 	if hasSearchKey {
 		hasCachedData, cachedData, err := cache.Get(strings.Join([]string{api.GetDataCachePrefix(), searchKey}, ""))
 		if err != nil {
-			return false, "", err
+			return cacheFetchResponse{}, err
 		}
 
 		if hasCachedData {
-			if incrmentCount {
-				incrementSearchCount(searchKey, api)
-			}
-			return true, cachedData, err
+			return cacheFetchResponse{Found: true, Data: cachedData, CacheKey: searchKey}, err
 		}
 	}
 
-	return false, "", nil
+	return cacheFetchResponse{}, nil
 }
 
-func cacheResponse(search string, api a.CachedSearchAPI, result a.CachedSearchAPIResponse) {
+func cacheQuery(search string, api a.CachedSearchAPI, result a.CachedSearchAPIResponse) {
 	keys := []string{api.GetSearchCachePrefix() + search, api.GetDataCachePrefix() + result.SearchKey}
 	values := []string{result.SearchKey, result.Data}
 
@@ -48,23 +50,6 @@ func cacheResponse(search string, api a.CachedSearchAPI, result a.CachedSearchAP
 
 func incrementSearchCount(cacheKey string, api a.CachedSearchAPI) error {
 	return cache.Increment(api.GetCountCachePrefix() + cacheKey)
-}
-
-func setAskedCountFooter(embed *discordgo.MessageEmbed, cacheKey string, api a.CachedSearchAPI) *discordgo.MessageEmbed {
-	askedBeforeCount, err := getSearchCount(cacheKey, api)
-	if err != nil {
-		return embed
-	}
-
-	var footerText string
-
-	if askedBeforeCount <= 1 {
-		footerText = "You're the first person to ask about this."
-	} else {
-		footerText = "Asked " + strconv.Itoa(askedBeforeCount) + " times before."
-	}
-	embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
-	return embed
 }
 
 func getSearchCount(cacheKey string, api a.CachedSearchAPI) (int, error) {

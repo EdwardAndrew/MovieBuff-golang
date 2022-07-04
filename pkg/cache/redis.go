@@ -23,7 +23,7 @@ func Close() {
 }
 
 func Increment(key string) error {
-	if err := checkRedis(); err != nil {
+	if err := check(); err != nil {
 		log.Print(err)
 	}
 
@@ -33,7 +33,7 @@ func Increment(key string) error {
 // Takes a key and returns a bool indicating if any data was found,
 //  cached data as a string. And also an error.
 func Get(key string) (bool, string, error) {
-	err := checkRedis()
+	err := check()
 	if err != nil {
 		log.Print(err)
 	}
@@ -49,7 +49,7 @@ func Get(key string) (bool, string, error) {
 }
 
 func Set(key, val string, expiration time.Duration) error {
-	err := checkRedis()
+	err := check()
 	if err != nil {
 		log.Print(err)
 	}
@@ -66,7 +66,7 @@ func SetMultiple(keys []string, values []string) error {
 	return rdb.MSet(ctx, pairs...).Err()
 }
 
-func checkRedis() error {
+func check() error {
 	var err error = nil
 	if rdb == nil {
 		err = errors.New("Redis is nil, have you called Connect?")

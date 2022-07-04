@@ -17,7 +17,7 @@ func main() {
 	cache.Connect(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password
-		DB:       0,  // default
+		DB:       0,  // default db
 	})
 	discord, err := discordgo.New("Bot " + config.Get().DiscordToken)
 
