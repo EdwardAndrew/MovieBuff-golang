@@ -11,7 +11,10 @@ func Route(s *discordgo.Session, m *discordgo.Message) {
 	cmd := u.RemoveBotPrefix(m.Content, s.State.User.ID)
 	switch {
 	case cmd == "h", cmd == "help", cmd == "info", cmd == "commands":
-		s.ChannelMessageSendEmbed(m.ChannelID, u.GetHelpEmbed())
+		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Content: "I'd love to help you...",
+			Embeds:  []*discordgo.MessageEmbed{u.GetHelpEmbed(s)},
+		})
 	case cmd == "prefix":
 		s.ChannelMessageSend(m.ChannelID, u.FormatResponse(config.Get().Prefix+" is my prefix."))
 	default:

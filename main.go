@@ -8,6 +8,7 @@ import (
 
 	"github.com/EdwardAndrew/MovieBuff/internal/config"
 	"github.com/EdwardAndrew/MovieBuff/internal/handlers"
+	"github.com/EdwardAndrew/MovieBuff/internal/metrics"
 	"github.com/EdwardAndrew/MovieBuff/pkg/cache"
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-redis/redis/v9"
@@ -19,6 +20,7 @@ func main() {
 		Password: "", // no password
 		DB:       0,  // default db
 	})
+	metrics.Init()
 	discord, err := discordgo.New("Bot " + config.Get().DiscordToken)
 
 	if err != nil {
@@ -40,4 +42,5 @@ func main() {
 
 	discord.Close()
 	cache.Close()
+	metrics.Close()
 }
