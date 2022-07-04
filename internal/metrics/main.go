@@ -18,13 +18,8 @@ var (
 )
 
 var server http.Server
-var reg *prometheus.Registry
 
 func Init() {
-
-	reg = prometheus.NewRegistry()
-	reg.MustRegister()
-
 	prometheus.MustRegister(hdFailures)
 	server = http.Server{
 		Addr: ":3000",
